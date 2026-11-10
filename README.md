@@ -175,3 +175,7 @@ demo.sh                   offline demo
 Run the tests with `python3 -m unittest discover -s tests -v`.
 
 To add a rule or phrase, edit `customs/rules.py` and add a test case to `tests/test_customs.py`.
+
+## Authors
+
+Built by team Dungeon Dwellers at the SAAF security challenge (Mollie, Amsterdam, 10 November 2026): Anja Nell and Tony Barratt.
