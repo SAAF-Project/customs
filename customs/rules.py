@@ -141,6 +141,7 @@ LINE_RULES = [
             r"\bfetch\s*\(\s*['\"`]https?://",
             r"\brequests\.get\s*\(",
             r"\burllib\.request\b",
+            r"\bgit\s+clone\s+\S",
             r"\bhttpx\.\w+\s*\(",
         ),
     ),
@@ -178,7 +179,7 @@ LINE_RULES = [
             r"%APPDATA%|AppData[\\/]+Roaming",
             r"\b(login\s+)?keychain\b",
             r"\b(browser|chrome|edge|firefox)\s+(cookies|passwords|saved\s+logins)\b",
-            r"\b(read|open|cat|print|include|copy|upload|send|show|dump|lees)\b"
+            r"\b(read|open|cat|load|print|include|copy|upload|send|show|dump|lees)\b"
             r"[^\n]{0,40}(?<![\w-])\.env\b(?![\w-])",
         ),
     ),

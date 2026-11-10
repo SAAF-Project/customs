@@ -50,8 +50,11 @@ python3 customs/customs.py skills/my-skill         # one file or folder
 | `--json report.json` | Also write the results as JSON. |
 | `--markdown report.md` | Also write a Markdown summary. |
 | `--config other.toml` | Use a different settings file. |
+| `--allow-empty` | Clear a scan that matches no files. Without it, such a scan is reported as not assessed. |
 
-Exit codes: `0` cleared, `1` blocked, `2` could not run.
+Exit codes: `0` cleared, `1` blocked, `2` could not run or nothing was inspected.
+
+**No silent pass.** Customs never clears what it did not inspect. If a full scan, or a folder you name, matches no files (for example because the prompts use a file type that is not included, or everything is excluded), Customs reports NOT ASSESSED and exits with `2`, so the check fails instead of showing green. A pull request that changes no inspected files (`--changed-since`) is still cleared, because there is nothing to inspect.
 
 In GitHub Actions, Customs also writes a summary table to the run page and marks each finding on the changed line of the pull request.
 
@@ -136,6 +139,17 @@ expires = 2027-06-30
 ```
 
 Every field except `contains` is required. Customs ignores and reports any exception without a justification, an approver or a valid expiry date, and stops applying an exception once it expires, so exceptions are reviewed periodically. Accepted findings stay in the report with their justification, which keeps the audit trail visible.
+
+## Findings from the security challenge it addresses
+
+Checked against the findings handed in on 10 November 2026:
+
+| Finding | Repo | How Customs responds |
+|---|---|---|
+| AGENTS.md, auto-loaded through CLAUDE.md, tells coding agents to clone code and contact outside services | python-mcp-framework | Reports each network command (CUS-N4, which now includes `git clone`) and each unapproved address (CUS-N2) for the reviewer. Reproduced in `tests/fixtures/autorun`. |
+| Several checks across SAAF report OK when they assessed nothing | three-way-match-audit, Stress-test, saaf-living-map and others | Customs applies the same lesson to itself: a scan that inspects nothing is NOT ASSESSED, not CLEARED. |
+
+The wider aim is the one in the opening section: a hidden instruction in a shared skill should be stopped before it reaches the organisations that reuse it.
 
 ## Limitations
 

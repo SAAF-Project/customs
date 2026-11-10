@@ -88,9 +88,6 @@ DEFAULT_CONFIG = {
         "githubusercontent.com",
         "saafproject.com",
         "saaf-portal.vercel.app",
-        "saaf-project.github.io",
-        "localhost",
-        "127.0.0.1",
         "europa.eu",
         "norea.nl",
         "isaca.org",
@@ -614,6 +611,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fail-on", choices=R.SEVERITIES, help="lowest severity that blocks (default: High)")
     parser.add_argument("--json", metavar="FILE", help="also write results as JSON")
     parser.add_argument("--markdown", metavar="FILE", help="also write a Markdown summary")
+    parser.add_argument("--allow-empty", action="store_true",
+                        help="clear a full scan that matches no files (default: report NOT ASSESSED, exit 2)")
     parser.add_argument("--version", action="version", version=f"Customs {VERSION}")
     args = parser.parse_args(argv)
 
@@ -627,6 +626,15 @@ def main(argv: list[str] | None = None) -> int:
         exceptions = load_exceptions(root, args.changed_since, warnings)
     except (RuntimeError, ValueError, OSError, tomllib.TOMLDecodeError) as error:
         print(f"Customs could not run: {error}", file=sys.stderr)
+        return 2
+
+    # No silent pass: a scan that inspected nothing has not cleared anything.
+    # A pull request that changes no inspected files (--changed-since) is fine.
+    if not files and not args.changed_since and not args.allow_empty:
+        what = ", ".join(args.targets) if args.targets else "the repository"
+        print(f"Customs {VERSION}: NOT ASSESSED. No files in {what} matched the include "
+              "patterns (or all were excluded), so nothing was inspected. Check include and "
+              "exclude in customs.toml, or pass --allow-empty if this is expected.", file=sys.stderr)
         return 2
 
     findings: list[Finding] = []

@@ -169,5 +169,43 @@ class Exceptions(unittest.TestCase):
             self.assertIn("CUS-G1", rules)
 
 
+AUTORUN = HERE / "fixtures" / "autorun"
+
+
+def run_code(*args):
+    """Run Customs quietly and return only the exit code."""
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        return customs.main(list(args))
+
+
+class NoSilentPass(unittest.TestCase):
+    """A scan that inspected nothing must not report CLEARED."""
+
+    def test_empty_folder_is_not_assessed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(run_code("--root", tmp), 2)
+
+    def test_target_that_is_fully_excluded_is_not_assessed(self):
+        # tests/fixtures/** is excluded by default, so this target inspects nothing.
+        self.assertEqual(run_code("--root", str(HERE.parent), "tests/fixtures/poisoned"), 2)
+
+    def test_allow_empty_clears_an_empty_scan(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(run_code("--root", tmp, "--allow-empty"), 0)
+
+
+class TodaysFindings(unittest.TestCase):
+    """Patterns behind findings handed in at the security challenge, 10 Nov 2026."""
+
+    def test_auto_loaded_agent_instructions_that_run_network_commands_are_reported(self):
+        # python-mcp-framework: AGENTS.md, auto-loaded via CLAUDE.md, tells coding agents
+        # to clone code and contact outside services. The fixture reproduces the pattern.
+        code, report = run("--root", str(AUTORUN))
+        rules = [f["rule"] for f in report["findings"] if f["file"] == "AGENTS.md"]
+        self.assertGreaterEqual(rules.count("CUS-N4"), 2, rules)   # git clone and curl
+        self.assertIn("CUS-N2", rules)                             # unapproved web address
+        self.assertEqual(code, 0)  # Medium: shown to the reviewer, not blocking
+
+
 if __name__ == "__main__":
     unittest.main()
