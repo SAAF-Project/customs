@@ -151,6 +151,10 @@ Checked against the findings handed in on 10 November 2026:
 
 The wider aim is the one in the opening section: a hidden instruction in a shared skill should be stopped before it reaches the organisations that reuse it.
 
+## Security notes
+
+Report a weakness as the [SAAF security policy](https://github.com/SAAF-Project/.github/blob/main/SECURITY.md) describes, never in a public issue. A hidden instruction that Customs fails to catch, or a way to make it clear a contribution it should block, counts as a security bug. Describe how to reproduce it.
+
 ## Limitations
 
 - **Pattern matching, not understanding.** An attacker can rephrase an instruction so that no pattern matches, or write in a language other than English or Dutch. Customs catches the common techniques and raises the effort an attack needs. It supports a human reviewer; it does not replace one.
