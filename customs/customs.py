@@ -50,7 +50,7 @@ VERSION = "0.1.0"
 CONFIG_FILE = "customs.toml"
 ALLOWLIST_FILE = ".customs-allowlist.toml"
 PRUNE_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".customs-tool"}
-CONTROL_FILES = (CONFIG_FILE, ALLOWLIST_FILE, ".github/CODEOWNERS")
+CONTROL_FILES = (CONFIG_FILE, ALLOWLIST_FILE, ".github/CODEOWNERS", "agent.yaml")
 CONTROL_FOLDERS = ("customs/", ".github/workflows/")
 REQUIRED_EXCEPTION_FIELDS = ("rule", "path", "justification", "approved_by", "expires")
 

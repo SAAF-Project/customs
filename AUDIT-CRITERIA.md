@@ -45,6 +45,7 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 - [code] CO-2.1 Given a pull request that adds an exception for its own finding, Customs ignores that exception, still exits with 1 and reports CUS-G1.
 - [code] CO-2.2 Given a pull request that raises `fail_on` in `customs.toml` and adds a High finding, Customs applies the base branch setting, exits with 1 and reports CUS-G1 on `customs.toml`.
 - [code] CO-2.3 Given a pull request that changes a file in `.github/workflows/`, Customs reports CUS-G1 on that file, including when no other file in the pull request is inspected.
+- [code] CO-2.4 Given a pull request that changes `agent.yaml`, the mandate, Customs reports CUS-G1 on that file, so the reviewer sees that the agent's own rules are being changed.
   Limitation, stated honestly: CUS-G1 is Medium, so it informs the reviewer but does not block. Blocking such changes relies on the code owner rule and branch protection described in the README, which are GitHub settings outside Customs.
 
 **CO-3: No silent pass, and every finding is traceable**
@@ -80,7 +81,7 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 - **Pattern matching, not understanding.** Rephrased instructions, and languages other than English and Dutch, are not detected. Customs supports a human reviewer and does not replace one.
 - **It reads text and does not run code.** A script that looks harmless but behaves badly when run will pass. Script review needs separate tooling.
 - **It inspects the repository, not what an agent reads later.** Auditee documents, emails and web pages opened at run time need a separate guard.
-- **Changes to the guard inform but do not block (CO-2.3).** Blocking depends on branch protection and code owners being set in GitHub. Customs cannot verify that these settings are on.
+- **Changes to the guard inform but do not block (CO-2.3, CO-2.4).** Blocking depends on branch protection and code owners being set in GitHub. Customs cannot verify that these settings are on.
 - **Tested on challenge examples only.** Customs has not yet been tuned against every SAAF repository, so false positive and false negative rates on real content are unknown.
 - **Repository-level gaps.** None known. Dependencies are declared in requirements.txt (standard library only; tomli on Python before 3.11), and the workflows pin every GitHub action to a full commit SHA.
 
@@ -100,6 +101,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-2.1 | ☑ | `test_contribution_cannot_approve_its_own_exception` |
 | CO-2.2 | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
 | CO-2.3 | ☑ | `test_workflow_change_is_reported` |
+| CO-2.4 | ☑ | `test_mandate_change_is_reported` (gap found by the team's proof run on 17 November 2026: agent.yaml was missing from the control files) |
 | CO-3.1 | ☑ | `test_empty_folder_is_not_assessed` |
 | CO-3.2 | ☑ | `test_target_that_is_fully_excluded_is_not_assessed` |
 | CO-3.3 | ☑ | `test_allow_empty_clears_an_empty_scan`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |

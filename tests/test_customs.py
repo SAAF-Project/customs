@@ -252,6 +252,16 @@ class AuditCriteria(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertEqual(report["result"], "not_assessed")
 
+    def test_mandate_change_is_reported(self):  # CO-2.4
+        with tempfile.TemporaryDirectory() as tmp:
+            root = base_repo(tmp)
+            (root / "agent.yaml").write_text("name: Customs\nmandate:\n  forbidden_actions: []\n", encoding="utf-8")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "contribution")
+            code, report = run("--root", str(root), "--changed-since", "main")
+            g1 = [f["file"] for f in report["findings"] if f["rule"] == "CUS-G1"]
+            self.assertIn("agent.yaml", g1)
+
     def test_change_to_uninspected_files_only_is_not_assessed(self):  # CO-3.5, N-1
         with tempfile.TemporaryDirectory() as tmp:
             root = base_repo(tmp)
