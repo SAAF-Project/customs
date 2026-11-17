@@ -548,8 +548,9 @@ def print_report(findings, files, config, warnings, blocking, result) -> None:
         print(f"\nResult: NOTHING INSPECTED. No file was inspected, so this run is not evidence "
               f"that any content is safe. {others} finding(s) for review.")
     else:
-        print(f"\nResult: CLEARED. {others} finding(s) below {config['fail_on']} for review, "
-              f"{len(accepted)} accepted exception(s).")
+        print(f"\nResult: CLEARED. No finding at {config['fail_on']} or above in the {len(files)} "
+              f"file(s) inspected. {others} finding(s) below {config['fail_on']} for review, "
+              f"{len(accepted)} accepted exception(s). The merge decision stays with the reviewer.")
 
 
 def md_cell(text: str) -> str:

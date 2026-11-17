@@ -96,7 +96,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-1.4 | ☑ | `test_download_and_run` |
 | CO-1.5 | ☑ | `test_clean_skill_is_cleared_with_no_findings` |
 | CO-1.6 | ☑ | `test_guardrail_wording_is_not_flagged` |
-| CO-1.7 | ☐ | LLM check in `llm_checks.yaml`; not yet run on traced output |
+| CO-1.7 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 | CO-2.1 | ☑ | `test_contribution_cannot_approve_its_own_exception` |
 | CO-2.2 | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
 | CO-2.3 | ☑ | `test_workflow_change_is_reported` |
@@ -105,7 +105,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-3.3 | ☑ | `test_allow_empty_clears_an_empty_scan`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
 | CO-3.4 | ☑ | `test_summary_states_files_inspected_and_threshold` |
 | CO-3.5 | ☑ | `test_change_to_uninspected_files_only_is_not_assessed` |
-| CO-3.6 | ☐ | LLM check in `llm_checks.yaml`; not yet run on traced output |
+| CO-3.6 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 | CO-3.7 | ☑ | `test_pull_request_that_only_deletes_files_is_not_blocked` |
 | CO-4.1 | ☑ | `test_valid_exception_is_applied_and_kept_visible` |
 | CO-4.2 | ☑ | `test_exception_without_justification_is_ignored` |
@@ -119,7 +119,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | N-2 | ☑ | `test_contribution_cannot_approve_its_own_exception`, `test_contribution_cannot_loosen_settings_for_itself` |
 | N-3 | ☑ | `test_scanner_imports_no_network_library` |
 | N-4 | ☑ | `test_scanner_runs_only_git` |
-| N-5 | ☐ | LLM check in `llm_checks.yaml`; not yet run on traced output |
+| N-5 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 
 ## 7. Observability
 
