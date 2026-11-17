@@ -109,7 +109,7 @@ In GitHub:
    /.github/workflows/       @SAAF-Project/maintainers
    ```
 
-3. Before production use, pin the GitHub actions in the workflows to a full commit SHA rather than a tag. Keep the `pull_request` trigger. Do not switch to `pull_request_target`, which runs with write access and repository secrets.
+3. Keep the GitHub actions in the workflows pinned to a full commit SHA, with the release in a comment (for example `actions/checkout@<sha> # v4.4.0`), rather than to a tag that can be moved. To update an action, replace the SHA with the commit of the new release in a reviewed pull request. Keep the `pull_request` trigger. Do not switch to `pull_request_target`, which runs with write access and repository secrets.
 
 ## Settings
 
