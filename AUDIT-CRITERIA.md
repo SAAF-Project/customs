@@ -89,39 +89,39 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 
 Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit 0 pass, 1 fail, 2 not assessed. A ☐ criterion has no test yet and counts as not assessed, never as passed.
 
-| Criterion | Verified? | Evidence |
-|---|---|---|
-| CO-1.1 | ☑ | `test_poisoned_contribution_is_blocked` |
-| CO-1.2 | ☑ | `test_tag_characters_are_decoded` |
-| CO-1.3 | ☑ | `test_english_override`, `test_dutch_override` |
-| CO-1.4 | ☑ | `test_download_and_run` |
-| CO-1.5 | ☑ | `test_clean_skill_is_cleared_with_no_findings` |
-| CO-1.6 | ☑ | `test_guardrail_wording_is_not_flagged` |
-| CO-1.7 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
-| CO-2.1 | ☑ | `test_contribution_cannot_approve_its_own_exception` |
-| CO-2.2 | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
-| CO-2.3 | ☑ | `test_workflow_change_is_reported` |
-| CO-2.4 | ☑ | `test_mandate_change_is_reported` (gap found by the team's proof run on 17 November 2026: agent.yaml was missing from the control files) |
-| CO-3.1 | ☑ | `test_empty_folder_is_not_assessed` |
-| CO-3.2 | ☑ | `test_target_that_is_fully_excluded_is_not_assessed` |
-| CO-3.3 | ☑ | `test_allow_empty_clears_an_empty_scan`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
-| CO-3.4 | ☑ | `test_summary_states_files_inspected_and_threshold` |
-| CO-3.5 | ☑ | `test_change_to_uninspected_files_only_is_not_assessed` |
-| CO-3.6 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
-| CO-3.7 | ☑ | `test_pull_request_that_only_deletes_files_is_not_blocked` |
-| CO-4.1 | ☑ | `test_valid_exception_is_applied_and_kept_visible` |
-| CO-4.2 | ☑ | `test_exception_without_justification_is_ignored` |
-| CO-4.3 | ☑ | `test_expired_exception_is_ignored` |
-| CO-4.4 | ☑ | `test_exception_without_approver_is_ignored` |
-| M-1 | ☑ | `test_every_finding_names_rule_severity_file_and_line` |
-| M-2 | ☑ | `test_result_word_matches_exit_code`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
-| M-3 | ☑ | `test_valid_exception_is_applied_and_kept_visible`, `test_accepted_finding_records_approver` |
-| M-4 | ☑ | `test_exception_without_justification_is_ignored`, `test_expired_exception_is_ignored`, `test_exception_without_approver_is_ignored` |
-| N-1 | ☑ | `test_empty_folder_is_not_assessed`, `test_target_that_is_fully_excluded_is_not_assessed`, `test_change_to_uninspected_files_only_is_not_assessed`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
-| N-2 | ☑ | `test_contribution_cannot_approve_its_own_exception`, `test_contribution_cannot_loosen_settings_for_itself` |
-| N-3 | ☑ | `test_scanner_imports_no_network_library` |
-| N-4 | ☑ | `test_scanner_runs_only_git` |
-| N-5 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| Criterion | Test | Verified? | Evidence |
+|---|---|---|---|
+| CO-1.1 | `python3 -I scripts/run_criterion.py test_poisoned_contribution_is_blocked` | ☑ | `test_poisoned_contribution_is_blocked` |
+| CO-1.2 | `python3 -I scripts/run_criterion.py test_tag_characters_are_decoded` | ☑ | `test_tag_characters_are_decoded` |
+| CO-1.3 | `python3 -I scripts/run_criterion.py test_english_override test_dutch_override` | ☑ | `test_english_override`, `test_dutch_override` |
+| CO-1.4 | `python3 -I scripts/run_criterion.py test_download_and_run` | ☑ | `test_download_and_run` |
+| CO-1.5 | `python3 -I scripts/run_criterion.py test_clean_skill_is_cleared_with_no_findings` | ☑ | `test_clean_skill_is_cleared_with_no_findings` |
+| CO-1.6 | `python3 -I scripts/run_criterion.py test_guardrail_wording_is_not_flagged` | ☑ | `test_guardrail_wording_is_not_flagged` |
+| CO-1.7 |  | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| CO-2.1 | `python3 -I scripts/run_criterion.py test_contribution_cannot_approve_its_own_exception` | ☑ | `test_contribution_cannot_approve_its_own_exception` |
+| CO-2.2 | `python3 -I scripts/run_criterion.py test_contribution_cannot_loosen_settings_for_itself` | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
+| CO-2.3 | `python3 -I scripts/run_criterion.py test_workflow_change_is_reported` | ☑ | `test_workflow_change_is_reported` |
+| CO-2.4 | `python3 -I scripts/run_criterion.py test_mandate_change_is_reported` | ☑ | `test_mandate_change_is_reported` (gap found by the team's proof run on 17 November 2026: agent.yaml was missing from the control files) |
+| CO-3.1 | `python3 -I scripts/run_criterion.py test_empty_folder_is_not_assessed` | ☑ | `test_empty_folder_is_not_assessed` |
+| CO-3.2 | `python3 -I scripts/run_criterion.py test_target_that_is_fully_excluded_is_not_assessed` | ☑ | `test_target_that_is_fully_excluded_is_not_assessed` |
+| CO-3.3 | `python3 -I scripts/run_criterion.py test_allow_empty_clears_an_empty_scan test_allowed_empty_scan_says_nothing_inspected_not_cleared` | ☑ | `test_allow_empty_clears_an_empty_scan`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
+| CO-3.4 | `python3 -I scripts/run_criterion.py test_summary_states_files_inspected_and_threshold` | ☑ | `test_summary_states_files_inspected_and_threshold` |
+| CO-3.5 | `python3 -I scripts/run_criterion.py test_change_to_uninspected_files_only_is_not_assessed` | ☑ | `test_change_to_uninspected_files_only_is_not_assessed` |
+| CO-3.6 |  | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| CO-3.7 | `python3 -I scripts/run_criterion.py test_pull_request_that_only_deletes_files_is_not_blocked` | ☑ | `test_pull_request_that_only_deletes_files_is_not_blocked` |
+| CO-4.1 | `python3 -I scripts/run_criterion.py test_valid_exception_is_applied_and_kept_visible` | ☑ | `test_valid_exception_is_applied_and_kept_visible` |
+| CO-4.2 | `python3 -I scripts/run_criterion.py test_exception_without_justification_is_ignored` | ☑ | `test_exception_without_justification_is_ignored` |
+| CO-4.3 | `python3 -I scripts/run_criterion.py test_expired_exception_is_ignored` | ☑ | `test_expired_exception_is_ignored` |
+| CO-4.4 | `python3 -I scripts/run_criterion.py test_exception_without_approver_is_ignored` | ☑ | `test_exception_without_approver_is_ignored` |
+| M-1 | `python3 -I scripts/run_criterion.py test_every_finding_names_rule_severity_file_and_line` | ☑ | `test_every_finding_names_rule_severity_file_and_line` |
+| M-2 | `python3 -I scripts/run_criterion.py test_result_word_matches_exit_code test_allowed_empty_scan_says_nothing_inspected_not_cleared` | ☑ | `test_result_word_matches_exit_code`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
+| M-3 | `python3 -I scripts/run_criterion.py test_valid_exception_is_applied_and_kept_visible test_accepted_finding_records_approver` | ☑ | `test_valid_exception_is_applied_and_kept_visible`, `test_accepted_finding_records_approver` |
+| M-4 | `python3 -I scripts/run_criterion.py test_exception_without_justification_is_ignored test_expired_exception_is_ignored test_exception_without_approver_is_ignored` | ☑ | `test_exception_without_justification_is_ignored`, `test_expired_exception_is_ignored`, `test_exception_without_approver_is_ignored` |
+| N-1 | `python3 -I scripts/run_criterion.py test_empty_folder_is_not_assessed test_target_that_is_fully_excluded_is_not_assessed test_change_to_uninspected_files_only_is_not_assessed test_allowed_empty_scan_says_nothing_inspected_not_cleared` | ☑ | `test_empty_folder_is_not_assessed`, `test_target_that_is_fully_excluded_is_not_assessed`, `test_change_to_uninspected_files_only_is_not_assessed`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
+| N-2 | `python3 -I scripts/run_criterion.py test_contribution_cannot_approve_its_own_exception test_contribution_cannot_loosen_settings_for_itself` | ☑ | `test_contribution_cannot_approve_its_own_exception`, `test_contribution_cannot_loosen_settings_for_itself` |
+| N-3 | `python3 -I scripts/run_criterion.py test_scanner_imports_no_network_library` | ☑ | `test_scanner_imports_no_network_library` |
+| N-4 | `python3 -I scripts/run_criterion.py test_scanner_runs_only_git` | ☑ | `test_scanner_runs_only_git` |
+| N-5 |  | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 
 ## 7. Observability
 
