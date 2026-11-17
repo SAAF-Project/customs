@@ -84,6 +84,8 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 
 ## 6. Status and validation
 
+Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit 0 pass, 1 fail, 2 not assessed. A ☐ criterion has no test yet and counts as not assessed, never as passed.
+
 | Criterion | Verified? | Evidence |
 |---|---|---|
 | CO-1.1 | ☑ | `test_poisoned_contribution_is_blocked` |

@@ -25,7 +25,7 @@ mandate:
     - action: read_settings_from_contribution
       rationale: Settings and exceptions are read from the base branch, so a pull request cannot loosen the rules for itself or approve its own exception.
     - action: clear_unassessed_scan
-      rationale: A scan that inspects no files is reported as NOT ASSESSED and exits with 2, never as cleared, unless the CI workflow passes --allow-empty, and changing a workflow is itself reported as CUS-G1. No silent pass by default.
+      rationale: A full or named scan that inspects no files is reported as NOT ASSESSED and exits with 2, never as cleared, unless the CI workflow passes --allow-empty, and changing a workflow is itself reported as CUS-G1. No silent pass by default. A pull request that changes only uninspected file types is still cleared with a count of zero; see AUDIT-CRITERIA CO-3.5.
     - action: execute_inspected_content
       rationale: Customs reads contributions as text and never runs a script or command found in them.
     - action: modify_inspected_files
