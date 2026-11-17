@@ -382,5 +382,50 @@ class Mandate(unittest.TestCase):
         self.assertEqual(command.elts[0].value, "git")
 
 
+PROMPT = """You are a work-program agent. For each control:
+
+1. Draft a test of design and a test of operating effectiveness.
+2. Assign an auditor.
+
+Return only JSON.
+"""
+
+
+class PromptChanges(unittest.TestCase):
+    """CUS-G2: a reworded instruction is named, so the reviewer can check what it carried."""
+
+    def contribute(self, after):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            git(root, "init", "-q")
+            git(root, "checkout", "-q", "-b", "main")
+            (root / "SKILL.md").write_text(PROMPT, encoding="utf-8")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "base")
+            git(root, "checkout", "-q", "-b", "contribution")
+            (root / "SKILL.md").write_text(after, encoding="utf-8")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "contribution")
+            return run("--root", str(root), "--changed-since", "main")
+
+    def test_sections_split_on_paragraphs_and_numbered_steps(self):
+        self.assertEqual(len(customs.prompt_sections(PROMPT)), 4)
+
+    def test_reworded_step_is_reported_and_does_not_block(self):
+        code, report = self.contribute(PROMPT.replace("and a test of operating effectiveness", ""))
+        found = [f for f in report["findings"] if f["rule"] == "CUS-G2"]
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0]["severity"], "Informational")
+        self.assertIn("Draft a test of design", found[0]["excerpt"])
+        self.assertEqual(code, 0)
+
+    def test_unchanged_sections_report_nothing(self):
+        _, report = self.contribute(PROMPT + "\n")
+        self.assertNotIn("CUS-G2", {f["rule"] for f in report["findings"]})
+
+    def test_full_scan_without_a_base_reports_nothing(self):
+        self.assertEqual(customs.prompt_changes(Path("."), ["SKILL.md"], None), [])
+
+
 if __name__ == "__main__":
     unittest.main()
