@@ -1,0 +1,45 @@
+# Living Map manifest for Customs (SAAF quality standard 2).
+# Convention: docs/conventions/agent-yaml.md in SAAF-Project.
+name: Customs
+repo: SAAF-Project/customs
+island: governance
+# The owners adjust this as the agent moves through the maturity stages.
+maturity: building   # building | ready | tested | improving
+category: "AI Governance"
+language: Python
+depends_on: []
+tags: [guard, CI, prompt-injection, supply-chain, skills, agent-settings, security-challenge]
+description: "Deterministic pull request check that inspects contributions to shared SAAF prompts, skills and agent settings, and blocks hidden or harmful instructions before they are merged."
+
+# The approved mandate. Changing this requires a pull request.
+mandate:
+  purpose: >-
+    Inspect every contribution to shared SAAF prompts, skills and agent
+    settings before it is merged, block content that could steer an agent
+    against the person using it with a plain English report of what was found
+    and where, and never clear what it did not inspect.
+  allowed_tools: [read_repository_files, read_git_diff, read_base_branch_settings, write_findings_report, write_ci_summary]
+  forbidden_actions:
+    - action: change_own_config
+      rationale: Changes to this mandate, customs.toml, the exception list, the rules or the CI workflows go through a pull request that a code owner reviews; Customs reports such changes as CUS-G1.
+    - action: read_settings_from_contribution
+      rationale: Settings and exceptions are read from the base branch, so a pull request cannot loosen the rules for itself or approve its own exception.
+    - action: clear_unassessed_scan
+      rationale: A scan that inspects no files is reported as NOT ASSESSED and exits with 2, never as cleared, unless the CI workflow passes --allow-empty, and changing a workflow is itself reported as CUS-G1. No silent pass by default.
+    - action: execute_inspected_content
+      rationale: Customs reads contributions as text and never runs a script or command found in them.
+    - action: modify_inspected_files
+      rationale: Customs reports findings; the contributor and the reviewer decide what changes.
+    - action: call_llm
+      rationale: Deterministic by design, so it gives the same answer whichever AI tool an organisation uses and can be tested exactly.
+    - action: network_access
+      rationale: Runs offline, so inspected content never leaves the runner.
+    - action: approve_or_merge_pull_request
+      rationale: Customs supports a human reviewer and does not replace one; the merge decision stays with the reviewer.
+  trusted_inputs: [customs_rules, base_branch_customs_toml, base_branch_customs_allowlist]  # every contribution is untrusted
+  max_runtime_minutes: 10
+  human_approval_required_for:
+    - merging any pull request, whether Customs cleared or blocked it
+    - adding or renewing an exception in .customs-allowlist.toml
+    - changing customs.toml, the rules or the CI workflows
+  evidence_policy: cite_only_given_context   # every finding names the rule, the file and the line it matched
