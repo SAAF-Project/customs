@@ -27,6 +27,7 @@ Customs uses no AI model and makes no network calls. It gives the same answer wh
 | CUS-P2 | Medium | Agent settings that add tool servers or download packages at start-up, especially unpinned versions. |
 | CUS-G1 | Medium | Changes to Customs itself, its settings, its exception list or the CI workflows. |
 | CUS-G2 | Informational | In a pull request (`--changed-since`), instruction sections that were added, removed or reworded, so a reviewer checks what the old wording carried. Points to prompt attribution (SAAF-Project #157). Never blocks. |
+| CUS-G1 | Medium | Changes to Customs itself, its settings, its exception list, its mandate (`agent.yaml`), its code owners or the CI workflows. |
 | CUS-X1 | Low | Files that cannot be read as text. |
 
 By default, findings rated High or above block the merge. Lower findings are listed for the reviewer.
@@ -98,7 +99,7 @@ A control is only as strong as the controls around it. Customs has two protectio
 Built in:
 
 - When Customs checks a pull request, it reads its settings (`customs.toml`) and its exception list (`.customs-allowlist.toml`) from the base branch, not from the contribution. A pull request cannot loosen the rules for itself or approve its own exception.
-- Any change to Customs, its settings, its exception list or the CI workflows is reported as CUS-G1, so the reviewer sees it.
+- Any change to Customs, its settings, its exception list, its mandate (`agent.yaml`), its code owners or the CI workflows is reported as CUS-G1, so the reviewer sees it.
 
 In GitHub:
 
@@ -109,6 +110,7 @@ In GitHub:
    /customs/                 @SAAF-Project/maintainers
    /customs.toml             @SAAF-Project/maintainers
    /.customs-allowlist.toml  @SAAF-Project/maintainers
+   /agent.yaml               @SAAF-Project/maintainers
    /.github/workflows/       @SAAF-Project/maintainers
    ```
 
@@ -174,12 +176,18 @@ customs/customs.py        the scanner
 customs/rules.py          the rules, with plain English reasons
 customs.toml              settings
 .customs-allowlist.toml   exception list (template)
+agent.yaml                mandate: what Customs may and may not do (SAAF Living Map)
+AUDIT-CRITERIA.md         what Customs is judged against, with numbered criteria and evidence
+llm_checks.yaml           reading checks for the criteria a program cannot decide
+evals/                    results of those reading checks
+scripts/run_criterion.py  runs the test behind one criterion: exit 0 pass, 1 fail, 2 not assessed
+requirements.txt          dependencies (standard library only)
 .github/workflows/        CI workflow, reusable workflow and tests
 tests/                    tests and the clean and poisoned example skills
 demo.sh                   offline demo
 ```
 
-Run the tests with `python3 -m unittest discover -s tests -v`.
+Run the tests with `python3 -m unittest discover -s tests -v`. To check one audit criterion, run the test named for it in the status table of `AUDIT-CRITERIA.md`, for example `python3 -I scripts/run_criterion.py test_poisoned_contribution_is_blocked`.
 
 To add a rule or phrase, edit `customs/rules.py` and add a test case to `tests/test_customs.py`.
 

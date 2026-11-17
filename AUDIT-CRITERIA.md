@@ -97,7 +97,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-1.4 | `python3 -I scripts/run_criterion.py test_download_and_run` | ☑ | `test_download_and_run` |
 | CO-1.5 | `python3 -I scripts/run_criterion.py test_clean_skill_is_cleared_with_no_findings` | ☑ | `test_clean_skill_is_cleared_with_no_findings` |
 | CO-1.6 | `python3 -I scripts/run_criterion.py test_guardrail_wording_is_not_flagged` | ☑ | `test_guardrail_wording_is_not_flagged` |
-| CO-1.7 |  | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| CO-1.7 | `llm_checks.yaml` | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 | CO-2.1 | `python3 -I scripts/run_criterion.py test_contribution_cannot_approve_its_own_exception` | ☑ | `test_contribution_cannot_approve_its_own_exception` |
 | CO-2.2 | `python3 -I scripts/run_criterion.py test_contribution_cannot_loosen_settings_for_itself` | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
 | CO-2.3 | `python3 -I scripts/run_criterion.py test_workflow_change_is_reported` | ☑ | `test_workflow_change_is_reported` |
@@ -107,7 +107,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-3.3 | `python3 -I scripts/run_criterion.py test_allow_empty_clears_an_empty_scan test_allowed_empty_scan_says_nothing_inspected_not_cleared` | ☑ | `test_allow_empty_clears_an_empty_scan`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
 | CO-3.4 | `python3 -I scripts/run_criterion.py test_summary_states_files_inspected_and_threshold` | ☑ | `test_summary_states_files_inspected_and_threshold` |
 | CO-3.5 | `python3 -I scripts/run_criterion.py test_change_to_uninspected_files_only_is_not_assessed` | ☑ | `test_change_to_uninspected_files_only_is_not_assessed` |
-| CO-3.6 |  | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| CO-3.6 | `llm_checks.yaml` | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 | CO-3.7 | `python3 -I scripts/run_criterion.py test_pull_request_that_only_deletes_files_is_not_blocked` | ☑ | `test_pull_request_that_only_deletes_files_is_not_blocked` |
 | CO-4.1 | `python3 -I scripts/run_criterion.py test_valid_exception_is_applied_and_kept_visible` | ☑ | `test_valid_exception_is_applied_and_kept_visible` |
 | CO-4.2 | `python3 -I scripts/run_criterion.py test_exception_without_justification_is_ignored` | ☑ | `test_exception_without_justification_is_ignored` |
@@ -121,8 +121,10 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | N-2 | `python3 -I scripts/run_criterion.py test_contribution_cannot_approve_its_own_exception test_contribution_cannot_loosen_settings_for_itself` | ☑ | `test_contribution_cannot_approve_its_own_exception`, `test_contribution_cannot_loosen_settings_for_itself` |
 | N-3 | `python3 -I scripts/run_criterion.py test_scanner_imports_no_network_library` | ☑ | `test_scanner_imports_no_network_library` |
 | N-4 | `python3 -I scripts/run_criterion.py test_scanner_runs_only_git` | ☑ | `test_scanner_runs_only_git` |
-| N-5 |  | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| N-5 | `llm_checks.yaml` | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 
 ## 7. Observability
+
+Every pull request and every push to main runs each criterion's Test command (`scripts/check_criteria.py`, workflow `criteria.yml`) and writes the result table to the run summary. A criterion that cannot run counts as not tested and fails the check; not tested is never green.
 
 Each run prints a summary and every finding to the console, can write a JSON and a Markdown report (`--json`, `--markdown`), and in GitHub Actions adds a summary table to the run page and marks each finding on the changed line of the pull request. There is no record of runs beyond the GitHub Actions logs, and no view across repositories of what Customs blocked or accepted. Customs makes no model calls, so model tracing does not apply; the three `[llm]` criteria can still be scored by running the checks in `llm_checks.yaml` against saved reports.
