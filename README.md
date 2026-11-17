@@ -50,11 +50,13 @@ python3 customs/customs.py skills/my-skill         # one file or folder
 | `--json report.json` | Also write the results as JSON. |
 | `--markdown report.md` | Also write a Markdown summary. |
 | `--config other.toml` | Use a different settings file. |
-| `--allow-empty` | Clear a scan that matches no files. Without it, such a scan is reported as not assessed. |
+| `--allow-empty` | Accept a scan that inspects no files. The result is NOTHING INSPECTED with exit code `0`, never CLEARED. Without it, such a scan is NOT ASSESSED. |
 
-Exit codes: `0` cleared, `1` blocked, `2` could not run or nothing was inspected.
+Exit codes: `0` cleared (or nothing inspected, when allowed), `1` blocked, `2` could not run or not assessed.
 
-**No silent pass.** Customs never clears what it did not inspect. If a full scan, or a folder you name, matches no files (for example because the prompts use a file type that is not included, or everything is excluded), Customs reports NOT ASSESSED and exits with `2`, so the check fails instead of showing green. A pull request that changes no inspected files (`--changed-since`) is still cleared, because there is nothing to inspect.
+**No silent pass.** Customs never clears what it did not inspect. If a full scan, a folder you name, or the files a pull request changes (`--changed-since`) include nothing it inspects (for example because the change is only to a script, the prompts use a file type that is not included, or everything is excluded), Customs reports NOT ASSESSED, lists the files it did not inspect and exits with `2`, so the check fails instead of showing green. Changes to Customs controls (CUS-G1) are still reported in that run. A pull request that adds or changes no files at all, for example one that only deletes files, has nothing to inspect: the result is NOTHING INSPECTED, with exit code `0`.
+
+If your repository regularly has pull requests that change only code, and that code is reviewed elsewhere, pass `--allow-empty` in the workflow. Those runs then report NOTHING INSPECTED rather than failing, and still never CLEARED.
 
 In GitHub Actions, Customs also writes a summary table to the run page and marks each finding on the changed line of the pull request.
 

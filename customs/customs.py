@@ -513,7 +513,7 @@ def control_changes(changed: list[str]) -> list[Finding]:
 
 # Reporting
 
-def print_report(findings, files, config, warnings, blocking) -> None:
+def print_report(findings, files, config, warnings, blocking, result) -> None:
     print(f"Customs {VERSION}: inspected {len(files)} file(s), "
           f"blocking at {config['fail_on']} and above.\n")
     wrap = dict(width=92, initial_indent=" " * 11, subsequent_indent=" " * 11)
@@ -538,9 +538,15 @@ def print_report(findings, files, config, warnings, blocking) -> None:
         for w in warnings:
             print(f"  {w}")
     others = sum(1 for f in findings if not f.accepted) - len(blocking)
-    if blocking:
+    if result == "blocked":
         print(f"\nResult: BLOCKED. {len(blocking)} finding(s) at {config['fail_on']} or above "
               f"must be fixed or approved as an exception. {others} other finding(s) for review.")
+    elif result == "not_assessed":
+        print(f"\nResult: NOT ASSESSED. No file was inspected, so the check fails rather than "
+              f"showing green. {others} finding(s) for review.")
+    elif result == "nothing_inspected":
+        print(f"\nResult: NOTHING INSPECTED. No file was inspected, so this run is not evidence "
+              f"that any content is safe. {others} finding(s) for review.")
     else:
         print(f"\nResult: CLEARED. {others} finding(s) below {config['fail_on']} for review, "
               f"{len(accepted)} accepted exception(s).")
@@ -550,8 +556,9 @@ def md_cell(text: str) -> str:
     return text.replace("|", "\\|").replace("<", "&lt;").replace("\n", " ")
 
 
-def markdown_report(findings, files, config, warnings, blocking) -> str:
-    status = "Blocked" if blocking else "Cleared"
+def markdown_report(findings, files, config, warnings, blocking, result) -> str:
+    status = {"blocked": "Blocked", "not_assessed": "Not assessed",
+              "nothing_inspected": "Nothing inspected"}.get(result, "Cleared")
     lines = [
         f"## Customs: {status}", "",
         f"Inspected {len(files)} file(s). Findings at **{config['fail_on']}** or above block the merge.", "",
@@ -612,7 +619,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", metavar="FILE", help="also write results as JSON")
     parser.add_argument("--markdown", metavar="FILE", help="also write a Markdown summary")
     parser.add_argument("--allow-empty", action="store_true",
-                        help="clear a full scan that matches no files (default: report NOT ASSESSED, exit 2)")
+                        help="accept a scan that inspects no files: report NOTHING INSPECTED and exit 0 "
+                             "(default: report NOT ASSESSED, exit 2)")
     parser.add_argument("--version", action="version", version=f"Customs {VERSION}")
     args = parser.parse_args(argv)
 
@@ -629,13 +637,20 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     # No silent pass: a scan that inspected nothing has not cleared anything.
-    # A pull request that changes no inspected files (--changed-since) is fine.
-    if not files and not args.changed_since and not args.allow_empty:
-        what = ", ".join(args.targets) if args.targets else "the repository"
-        print(f"Customs {VERSION}: NOT ASSESSED. No files in {what} matched the include "
+    # This includes a pull request whose changed files are all outside the
+    # inspected file types. Only a pull request that adds or changes no files
+    # at all (for example one that only deletes) has nothing to inspect.
+    # The run still reports any change to Customs controls (CUS-G1), then exits with 2.
+    not_assessed = not files and not args.allow_empty and not (args.changed_since and not changed)
+    if not_assessed:
+        if args.changed_since:
+            listed = ", ".join(changed[:10]) + (f" and {len(changed) - 10} more" if len(changed) > 10 else "")
+            what = f"None of the {len(changed)} file(s) changed since {args.changed_since} ({listed})"
+        else:
+            what = "No files in " + (", ".join(args.targets) if args.targets else "the repository")
+        print(f"Customs {VERSION}: NOT ASSESSED. {what} matched the include "
               "patterns (or all were excluded), so nothing was inspected. Check include and "
               "exclude in customs.toml, or pass --allow-empty if this is expected.", file=sys.stderr)
-        return 2
 
     findings: list[Finding] = []
     for rel in files:
@@ -658,8 +673,17 @@ def main(argv: list[str] | None = None) -> int:
     threshold = rank(config["fail_on"])
     blocking = {id(f) for f in findings if not f.accepted and rank(f.severity) >= threshold}
 
-    print_report(findings, files, config, warnings, blocking)
-    summary = markdown_report(findings, files, config, warnings, blocking)
+    if blocking:
+        result = "blocked"
+    elif not_assessed:
+        result = "not_assessed"
+    elif not files:
+        result = "nothing_inspected"
+    else:
+        result = "cleared"
+
+    print_report(findings, files, config, warnings, blocking, result)
+    summary = markdown_report(findings, files, config, warnings, blocking, result)
     if os.environ.get("GITHUB_ACTIONS") == "true":
         annotate(findings, blocking)
         step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -672,13 +696,13 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.json).write_text(json.dumps({
             "tool": "Customs",
             "version": VERSION,
-            "result": "blocked" if blocking else "cleared",
+            "result": result,
             "fail_on": config["fail_on"],
             "files_scanned": files,
             "findings": [{k: v for k, v in asdict(f).items() if k != "raw"} for f in findings],
             "warnings": warnings,
         }, indent=2, ensure_ascii=False), encoding="utf-8")
-    return 1 if blocking else 0
+    return {"blocked": 1, "not_assessed": 2}.get(result, 0)
 
 
 if __name__ == "__main__":
