@@ -1,0 +1,40 @@
+# LLM checks for Customs (SAAF quality standard 3).
+#
+# One check per criterion tagged [llm] in AUDIT-CRITERIA.md, under the same
+# number. AUDIT-CRITERIA.md is the source: it says what must be true; each
+# check says how a judge reads one run to decide pass or fail.
+#
+# One run means the console output, or the Markdown report written with
+# --markdown, of one Customs run on synthetic content. Customs makes no model
+# calls, so these checks are run against saved reports, not traced calls.
+
+checks:
+  - id: CO-1.7
+    look_for: >-
+      The explanation given for each blocking finding in a BLOCKED run: whether
+      it says what was found, in which file and on which line, and why that
+      content could harm the person using an agent, in words a reviewer who
+      does not read code can follow.
+    pass_when: >-
+      Every blocking finding names the file and line and gives a plain English
+      reason that a non-developer could act on; it fails if any blocking finding
+      gives only a rule code, a regular expression or jargon with no reason.
+
+  - id: CO-3.6
+    look_for: >-
+      The summary of the run: the number of files inspected, the result word
+      (CLEARED, BLOCKED or NOT ASSESSED) and the reason for that result.
+    pass_when: >-
+      A reader can state from the output alone how many files were inspected,
+      what the result was and why; it fails if any of the three is missing or
+      if the result contradicts the findings listed.
+
+  - id: N-5
+    look_for: >-
+      The wording around a CLEARED result: whether it claims or implies that the
+      contribution is safe, approved, risk-free or ready to merge.
+    pass_when: >-
+      The output reports CLEARED as the absence of blocking findings in the
+      files inspected and leaves the merge decision to the reviewer; it fails if
+      it calls the content safe, approved or free of risk, or tells the reviewer
+      it can be merged.
