@@ -511,6 +511,58 @@ def control_changes(changed: list[str]) -> list[Finding]:
     ]
 
 
+_ITEM = re.compile(r"^\s*\d+\.\s", re.MULTILINE)
+
+
+def prompt_sections(text: str) -> list[str]:
+    """Split instructions into sections: paragraphs, and one section per numbered step."""
+    out = []
+    for block in re.split(r"\n[ \t]*\n", text.strip()):
+        starts = [m.start() for m in _ITEM.finditer(block)]
+        if not starts:
+            out.append(block.strip())
+            continue
+        if block[: starts[0]].strip():
+            out.append(block[: starts[0]].strip())
+        out += [block[a:b].strip() for a, b in zip(starts, starts[1:] + [len(block)])]
+    return [" ".join(s.split()) for s in out if s.strip()]
+
+
+def prompt_changes(root: Path, files: list[str], base_ref: str | None) -> list[Finding]:
+    """CUS-G2: name the instruction sections a contribution adds, removes or rewords.
+
+    Informational, never blocking. A change in wording can remove a soft control (a
+    rule that only holds because the prompt says so), so the reviewer is pointed to
+    prompt attribution, which measures what each section carries.
+    """
+    if not base_ref:
+        return []
+    findings = []
+    for rel in files:
+        before = git(root, "show", f"{base_ref}:{rel}")
+        if before is None:
+            continue  # a new file: every section is new, the other rules inspect it
+        try:
+            after = (root / rel).read_text(encoding="utf-8")
+        except (FileNotFoundError, UnicodeDecodeError):
+            continue
+        old, new = prompt_sections(before), prompt_sections(after)
+        removed = [s for s in old if s not in new]
+        added = [s for s in new if s not in old]
+        if not removed and not added:
+            continue
+        label = "; ".join(shorten(s, 50) for s in (removed + added)[:3])
+        findings.append(Finding(
+            "CUS-G2", "Informational", "Prompt sections changed", rel, 0,
+            f"{len(added)} section(s) added or reworded, {len(removed)} removed or reworded: {label}",
+            "Instructions changed. A rule that holds only because the prompt says so can disappear "
+            "with its wording. Before relying on the changed prompt, run prompt attribution on it "
+            "(SAAF-Project/SAAF-Project, tools/scripts/prompt_attribution) to see which sections "
+            "carry the agent's audit criteria.",
+        ))
+    return findings
+
+
 # Reporting
 
 def print_report(findings, files, config, warnings, blocking, result) -> None:
@@ -668,6 +720,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         findings += scan_text(rel, text, config)
     findings += control_changes(changed)
+    findings += prompt_changes(root, files, args.changed_since)
     apply_exceptions(findings, exceptions)
     findings.sort(key=lambda f: (f.file, f.line, -rank(f.severity), f.rule))
 
