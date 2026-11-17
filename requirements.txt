@@ -1,0 +1,13 @@
+# Dependencies for Customs (SAAF quality standard 7).
+#
+# Customs needs Python 3.11 or later and no third-party packages. Every
+# module it imports, including tomllib for reading customs.toml, is part of
+# the Python standard library. The tests use unittest, also in the standard
+# library. CI runs on Python 3.12.
+#
+# customs/customs.py falls back to the 'tomli' package on Python 3.10 or
+# earlier. Those versions are not supported, so tomli is not listed here.
+#
+# This file is intentionally empty of packages. Any package added later must
+# be pinned to an exact version with ==, and the change reviewed in a pull
+# request, because Customs is a guard that other repositories rely on.
