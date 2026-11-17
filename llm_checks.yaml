@@ -23,7 +23,7 @@ checks:
   - id: CO-3.6
     look_for: >-
       The summary of the run: the number of files inspected, the result word
-      (CLEARED, BLOCKED or NOT ASSESSED) and the reason for that result.
+      (CLEARED, BLOCKED, NOT ASSESSED or NOTHING INSPECTED) and the reason for that result.
     pass_when: >-
       A reader can state from the output alone how many files were inspected,
       what the result was and why; it fails if any of the three is missing or

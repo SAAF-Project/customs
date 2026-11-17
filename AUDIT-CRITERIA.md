@@ -44,17 +44,18 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 **CO-2: The guard cannot be weakened by what it inspects**
 - [code] CO-2.1 Given a pull request that adds an exception for its own finding, Customs ignores that exception, still exits with 1 and reports CUS-G1.
 - [code] CO-2.2 Given a pull request that raises `fail_on` in `customs.toml` and adds a High finding, Customs applies the base branch setting, exits with 1 and reports CUS-G1 on `customs.toml`.
-- [code] CO-2.3 Given a pull request that changes a file in `.github/workflows/`, Customs reports CUS-G1 on that file.
+- [code] CO-2.3 Given a pull request that changes a file in `.github/workflows/`, Customs reports CUS-G1 on that file, including when no other file in the pull request is inspected.
   Limitation, stated honestly: CUS-G1 is Medium, so it informs the reviewer but does not block. Blocking such changes relies on the code owner rule and branch protection described in the README, which are GitHub settings outside Customs.
 
 **CO-3: No silent pass, and every finding is traceable**
 - [code] CO-3.1 Given a full scan of an empty folder, Customs reports NOT ASSESSED and exits with 2.
 - [code] CO-3.2 Given a target whose files are all excluded, Customs reports NOT ASSESSED and exits with 2.
-- [code] CO-3.3 Given an empty scan, Customs exits with 0 only when `--allow-empty` is passed explicitly.
+- [code] CO-3.3 Given a scan that inspects no files, Customs exits with 0 only when `--allow-empty` is passed explicitly, and then reports NOTHING INSPECTED, never CLEARED.
 - [code] CO-3.4 Given any run, the summary states how many files were inspected and the blocking severity.
-- [code] CO-3.5 Given a pull request that changes only files outside the inspected types (for example a Python script), Customs reports "inspected 0 file(s)" and the result CLEARED, exits with 0, and does not report the result as NOT ASSESSED.
-  Limitation, stated honestly: this criterion records current behaviour, which is documented in the README but sits uneasily with CO-3. The count of zero is visible, but the result still reads CLEARED and the check shows green. A script containing override wording passed this way in a manual run on 17 November 2026. See coverage gaps.
-- [llm] CO-3.6 Given the output of one run, a reader can tell from the output alone how many files were inspected, what the result was (CLEARED, BLOCKED or NOT ASSESSED) and why, without rerunning Customs.
+- [code] CO-3.5 Given a pull request that changes only files outside the inspected types (for example a Python script), Customs reports NOT ASSESSED, names the files it did not inspect, and exits with 2.
+  History, stated honestly: until 17 November 2026 such a pull request was reported as CLEARED with "inspected 0 file(s)" and a green check. A script containing override wording passed this way in a manual run that day. The behaviour was changed on the same day.
+- [llm] CO-3.6 Given the output of one run, a reader can tell from the output alone how many files were inspected, what the result was (CLEARED, BLOCKED, NOT ASSESSED or NOTHING INSPECTED) and why, without rerunning Customs.
+- [code] CO-3.7 Given a pull request that adds or changes no files at all (for example one that only deletes files), Customs reports NOTHING INSPECTED and exits with 0, because there is nothing to inspect.
 
 **CO-4: Exceptions are controlled**
 - [code] CO-4.1 Given a valid exception, Customs applies it and keeps the accepted finding in the report, with its justification.
@@ -66,15 +67,16 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 
 | # | A correct output MUST contain | # | Customs must NEVER |
 |---|---|---|---|
-| M-1 | ✓ [code] For every finding: the rule, the severity, the file and the line (0 when the finding is about the whole file). | N-1 | ✕ [code] Report CLEARED on a full or named scan that inspected no files, unless `--allow-empty` was passed. |
-| M-2 | ✓ [code] One result per run, CLEARED, BLOCKED or NOT ASSESSED, with exit code 0, 1 or 2 to match. | N-2 | ✕ [code] Read its settings or exception list from the contribution under inspection. |
+| M-1 | ✓ [code] For every finding: the rule, the severity, the file and the line (0 when the finding is about the whole file). | N-1 | ✕ [code] Report CLEARED on any scan that inspected no files. |
+| M-2 | ✓ [code] One result per run, with the exit code to match: CLEARED (0), BLOCKED (1), NOT ASSESSED (2), or NOTHING INSPECTED (0, only when allowed or when nothing was added or changed). | N-2 | ✕ [code] Read its settings or exception list from the contribution under inspection. |
 | M-3 | ✓ [code] Every accepted finding, with the justification and approver of the exception that accepted it. | N-3 | ✕ [code] Import a network library or call a model. |
 | M-4 | ✓ [code] A warning for every exception that was ignored, saying why. | N-4 | ✕ [code] Run any command other than `git`, or execute content it inspects. |
 | | | N-5 | ✕ [llm] Present a CLEARED result as proof that the content is safe or approved. |
 
 ## 5. Coverage gaps
 
-- **A pull request that changes only uninspected file types is cleared (CO-3.5).** Customs inspects Markdown, prompt, text and agent configuration files. A change to only a Python script, or to prompts kept in a file type that is not included, shows "inspected 0 file(s)" with the result CLEARED and a green check. The proposal is to report such a run as a distinct result, so that "nothing was inspected" never reads as a pass. This needs a decision by the maintainers, because it would change the outcome for every code-only pull request.
+- **Code-only pull requests now fail the Customs check (CO-3.5).** This is the intended effect of "no silent pass", but it means a pull request that changes only scripts shows a red Customs check, in this repository too. Repositories where that is routine can pass `--allow-empty`, which reports NOTHING INSPECTED instead. The trade-off should be reviewed after a few weeks of use.
+- **Repositories using the reusable workflow keep the old behaviour until a new release is tagged.** The workflow is fetched from a tagged release (`@v1`), so the change in CO-3.5 reaches them only after the maintainers tag a new release.
 - **Pattern matching, not understanding.** Rephrased instructions, and languages other than English and Dutch, are not detected. Customs supports a human reviewer and does not replace one.
 - **It reads text and does not run code.** A script that looks harmless but behaves badly when run will pass. Script review needs separate tooling.
 - **It inspects the repository, not what an agent reads later.** Auditee documents, emails and web pages opened at run time need a separate guard.
@@ -94,29 +96,30 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-1.4 | ☑ | `test_download_and_run` |
 | CO-1.5 | ☑ | `test_clean_skill_is_cleared_with_no_findings` |
 | CO-1.6 | ☑ | `test_guardrail_wording_is_not_flagged` |
-| CO-1.7 | ☐ | LLM check in `llm_checks.yaml`; not yet run on traced output |
+| CO-1.7 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 | CO-2.1 | ☑ | `test_contribution_cannot_approve_its_own_exception` |
 | CO-2.2 | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
 | CO-2.3 | ☑ | `test_workflow_change_is_reported` |
 | CO-3.1 | ☑ | `test_empty_folder_is_not_assessed` |
 | CO-3.2 | ☑ | `test_target_that_is_fully_excluded_is_not_assessed` |
-| CO-3.3 | ☑ | `test_allow_empty_clears_an_empty_scan` |
-| CO-3.4 | ☐ | Seen in manual runs on 17 November 2026; no test yet |
-| CO-3.5 | ☑ | `test_change_to_uninspected_files_only_is_cleared_with_zero_count` (records current behaviour; see coverage gaps) |
-| CO-3.6 | ☐ | LLM check in `llm_checks.yaml`; not yet run on traced output |
+| CO-3.3 | ☑ | `test_allow_empty_clears_an_empty_scan`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
+| CO-3.4 | ☑ | `test_summary_states_files_inspected_and_threshold` |
+| CO-3.5 | ☑ | `test_change_to_uninspected_files_only_is_not_assessed` |
+| CO-3.6 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| CO-3.7 | ☑ | `test_pull_request_that_only_deletes_files_is_not_blocked` |
 | CO-4.1 | ☑ | `test_valid_exception_is_applied_and_kept_visible` |
 | CO-4.2 | ☑ | `test_exception_without_justification_is_ignored` |
 | CO-4.3 | ☑ | `test_expired_exception_is_ignored` |
 | CO-4.4 | ☑ | `test_exception_without_approver_is_ignored` |
-| M-1 | ☐ | Fields defined in the `Finding` record in `customs/customs.py`; no test yet |
-| M-2 | ☐ | Covered in part by the exit code tests above; no test of the three result words |
-| M-3 | ☑ | `test_valid_exception_is_applied_and_kept_visible` (justification); approver not yet asserted |
+| M-1 | ☑ | `test_every_finding_names_rule_severity_file_and_line` |
+| M-2 | ☑ | `test_result_word_matches_exit_code`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
+| M-3 | ☑ | `test_valid_exception_is_applied_and_kept_visible`, `test_accepted_finding_records_approver` |
 | M-4 | ☑ | `test_exception_without_justification_is_ignored`, `test_expired_exception_is_ignored`, `test_exception_without_approver_is_ignored` |
-| N-1 | ☑ | `test_empty_folder_is_not_assessed`, `test_target_that_is_fully_excluded_is_not_assessed` |
+| N-1 | ☑ | `test_empty_folder_is_not_assessed`, `test_target_that_is_fully_excluded_is_not_assessed`, `test_change_to_uninspected_files_only_is_not_assessed`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
 | N-2 | ☑ | `test_contribution_cannot_approve_its_own_exception`, `test_contribution_cannot_loosen_settings_for_itself` |
 | N-3 | ☑ | `test_scanner_imports_no_network_library` |
 | N-4 | ☑ | `test_scanner_runs_only_git` |
-| N-5 | ☐ | LLM check in `llm_checks.yaml`; not yet run on traced output |
+| N-5 | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 
 ## 7. Observability
 
