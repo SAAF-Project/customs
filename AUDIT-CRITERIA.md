@@ -80,7 +80,7 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 - **It inspects the repository, not what an agent reads later.** Auditee documents, emails and web pages opened at run time need a separate guard.
 - **Changes to the guard inform but do not block (CO-2.3).** Blocking depends on branch protection and code owners being set in GitHub. Customs cannot verify that these settings are on.
 - **Tested on challenge examples only.** Customs has not yet been tuned against every SAAF repository, so false positive and false negative rates on real content are unknown.
-- **Repository-level gaps.** There is no dependency manifest yet (standard 7), and the workflows pin GitHub actions by tag rather than by commit SHA, which the README itself recommends changing before production use.
+- **Repository-level gaps.** Dependencies are declared in requirements.txt (standard library only; tomli on Python before 3.11). The workflows still pin GitHub actions by tag rather than by commit SHA, which the README itself recommends changing before production use.
 
 ## 6. Status and validation
 
