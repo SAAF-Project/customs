@@ -20,6 +20,8 @@ COMMAND = re.compile(r"`([^`]+)`")
 CRITERION_ID = re.compile(r"(?<![\w-])([A-Z]{1,4}-\d+(?:\.\d+)?)(?![\w-])")
 LLM = ("llm_checks.yaml", "evals/llm_checks.yaml")
 TIMEOUT = 600
+# The tests run Customs in Actions too; without this their synthetic results land in the job summary.
+CHILD_ENV = {k: v for k, v in os.environ.items() if k != "GITHUB_STEP_SUMMARY"}
 
 
 def rows(text):
@@ -48,7 +50,7 @@ def run(command):
     if argv and argv[0] in ("python", "python3"):
         argv[0] = sys.executable
     try:
-        return subprocess.run(argv, capture_output=True, timeout=TIMEOUT).returncode
+        return subprocess.run(argv, capture_output=True, timeout=TIMEOUT, env=CHILD_ENV).returncode
     except (OSError, subprocess.TimeoutExpired):
         return None
 

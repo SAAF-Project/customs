@@ -419,6 +419,15 @@ class PromptChanges(unittest.TestCase):
         self.assertIn("Draft a test of design", found[0]["excerpt"])
         self.assertEqual(code, 0)
 
+    def test_removed_step_is_reported_and_does_not_block(self):
+        code, report = self.contribute(PROMPT.replace("2. Assign an auditor.\n", ""))
+        found = [f for f in report["findings"] if f["rule"] == "CUS-G2"]
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0]["severity"], "Informational")
+        self.assertIn("0 section(s) added or reworded, 1 removed", found[0]["excerpt"])
+        self.assertIn("Assign an auditor", found[0]["excerpt"])
+        self.assertEqual(code, 0)
+
     def test_unchanged_sections_report_nothing(self):
         _, report = self.contribute(PROMPT + "\n")
         self.assertNotIn("CUS-G2", {f["rule"] for f in report["findings"]})
