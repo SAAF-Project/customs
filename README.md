@@ -25,9 +25,8 @@ Customs uses no AI model and makes no network calls. It gives the same answer wh
 | CUS-S1 | High | References to credential files, keys and other locations outside the project. |
 | CUS-P1 | High | Agent settings that grant blanket permissions or remove approval prompts. |
 | CUS-P2 | Medium | Agent settings that add tool servers or download packages at start-up, especially unpinned versions. |
-| CUS-G1 | Medium | Changes to Customs itself, its settings, its exception list or the CI workflows. |
-| CUS-G2 | Informational | In a pull request (`--changed-since`), instruction sections that were added, removed or reworded, so a reviewer checks what the old wording carried. Points to prompt attribution (SAAF-Project #157). Never blocks. |
 | CUS-G1 | Medium | Changes to Customs itself, its settings, its exception list, its mandate (`agent.yaml`), its code owners or the CI workflows. |
+| CUS-G2 | Informational | In a pull request (`--changed-since`), instruction sections that were added, removed or reworded, so a reviewer checks what the old wording carried. Points to prompt attribution (SAAF-Project #157). Never blocks. |
 | CUS-X1 | Low | Files that cannot be read as text. |
 
 By default, findings rated High or above block the merge. Lower findings are listed for the reviewer.

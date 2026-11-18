@@ -9,7 +9,7 @@ This document says what Customs must be judged against as an auditee. The [READM
 | **Agent** | Customs |
 | **Repository** | https://github.com/SAAF-Project/customs |
 | **Maintainer(s)** | Anja Nell (@AnjaNellRE), Tony Barratt (@TonyBarratt100) |
-| **Last reviewed** | 2026-11-17 |
+| **Last reviewed** | 2026-11-18 |
 | **Status** | Draft |
 
 Sources used to draft this document: the README, `customs/rules.py`, `customs/customs.py`, `agent.yaml`, the tests in `tests/test_customs.py`, and a set of manual runs on throwaway synthetic repositories on 17 November 2026 for behaviour the tests did not yet cover. All content used is synthetic.
@@ -39,6 +39,7 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 - [code] CO-1.5 Given the clean example skill in `tests/fixtures/clean`, Customs exits with 0 and reports no findings.
 - [code] CO-1.6 Given guardrail wording that forbids an action (for example "do not finalise the report without approval from the reviewer"), Customs does not report CUS-O1.
 - [llm] CO-1.7 Given a blocked contribution, every blocking finding explains in plain English what was found, where it is and why it could harm the user, so that a reviewer who does not read code can decide what to do.
+- [code] CO-1.8 Given a pull request (`--changed-since`) that rewords or removes a paragraph or numbered step in an existing instruction file, Customs reports CUS-G2 as Informational on that file, names the changed section, and does not block on it.
   Limitation, stated honestly: Customs matches patterns. An instruction rephrased so that no pattern matches, or written in a language other than English or Dutch, is not detected (see coverage gaps).
 
 **CO-2: The guard cannot be weakened by what it inspects**
@@ -98,6 +99,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-1.5 | `python3 -I scripts/run_criterion.py test_clean_skill_is_cleared_with_no_findings` | ☑ | `test_clean_skill_is_cleared_with_no_findings` |
 | CO-1.6 | `python3 -I scripts/run_criterion.py test_guardrail_wording_is_not_flagged` | ☑ | `test_guardrail_wording_is_not_flagged` |
 | CO-1.7 | `llm_checks.yaml` | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
+| CO-1.8 | `python3 -I scripts/run_criterion.py test_reworded_step_is_reported_and_does_not_block test_removed_step_is_reported_and_does_not_block` | ☑ | `test_reworded_step_is_reported_and_does_not_block`, `test_removed_step_is_reported_and_does_not_block` |
 | CO-2.1 | `python3 -I scripts/run_criterion.py test_contribution_cannot_approve_its_own_exception` | ☑ | `test_contribution_cannot_approve_its_own_exception` |
 | CO-2.2 | `python3 -I scripts/run_criterion.py test_contribution_cannot_loosen_settings_for_itself` | ☑ | `test_contribution_cannot_loosen_settings_for_itself` |
 | CO-2.3 | `python3 -I scripts/run_criterion.py test_workflow_change_is_reported` | ☑ | `test_workflow_change_is_reported` |
