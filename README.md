@@ -82,10 +82,17 @@ permissions:
   contents: read
 jobs:
   customs:
-    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@v1
+    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@02e3cf1e4678c36a816ecfd31a9d22ba366dd07a # v1.1.0
+    with:
+      customs-ref: 02e3cf1e4678c36a816ecfd31a9d22ba366dd07a # v1.1.0
 ```
 
-The checker is fetched from a tagged Customs release, not from the pull request, so a contribution cannot weaken the check that inspects it. Replace `SAAF-Project/customs` with the location where this repository is published.
+The checker is fetched from a Customs release, not from the pull request, so a contribution cannot weaken the check that inspects it. Replace `SAAF-Project/customs` with the location where this repository is published.
+
+- **Both lines are pinned to the same commit.** The reusable workflow's `customs-ref` defaults to `v1`, which still points to v1.0.1, and pinning both to a full commit SHA means nothing changes underneath you without a reviewed change to this file.
+- **The workflow runs on `pull_request` only.** Customs compares the contribution with the pull request's base branch, and other events have no base branch.
+- **Check what Customs inspects.** By default it inspects files that agents read as instructions: Markdown, `.prompt` files, `.cursorrules`, MCP settings, `*agent*.yaml` and similar. If your repository keeps its instructions elsewhere, add a `customs.toml` with your own patterns in `extra_include` (or `include` to replace the defaults).
+- **Start with Customs reporting only, not as a required check.** A pull request that changes only files Customs does not inspect is reported as NOT ASSESSED, and the check fails. Make it required (see [Protecting the guard](#protecting-the-guard)) once your include patterns cover your repository.
 
 ### Option B: copy it in
 
