@@ -93,7 +93,6 @@ The checker is fetched from a Customs release, not from the pull request, so a c
 - **The workflow runs on `pull_request` only.** Customs compares the contribution with the pull request's base branch, and other events have no base branch.
 - **Check what Customs inspects.** By default it inspects files that agents read as instructions: Markdown, `.prompt` files, `.cursorrules`, MCP settings, `*agent*.yaml` and similar. If your repository keeps its instructions elsewhere, add a `customs.toml` with your own patterns in `extra_include` (or `include` to replace the defaults).
 - **Start with Customs reporting only, not as a required check.** A pull request that changes only files Customs does not inspect is reported as NOT ASSESSED, and the check fails. Make it required (see [Protecting the guard](#protecting-the-guard)) once your include patterns cover your repository.
-- **Access.** While Customs is a private repository, only private repositories in the SAAF-Project organisation can use the reusable workflow, and only if the Actions access setting of the Customs repository allows it.
 
 ### Option B: copy it in
 
