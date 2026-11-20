@@ -2,7 +2,7 @@
 #
 # The checker is fetched from a tagged release of this repository, not from
 # the pull request being checked, so a contribution cannot weaken the check
-# that inspects it. Replace SAAF-Project/customs with the published location.
+# that inspects it.
 
 name: Customs (reusable)
 
@@ -13,6 +13,13 @@ on:
         description: Customs release to use
         type: string
         default: v1
+      allow-empty:
+        description: >-
+          Pass --allow-empty, so a pull request that changes no file Customs
+          inspects reports NOTHING INSPECTED and exits 0 instead of NOT ASSESSED.
+          Only for repositories whose code holds no prompts. See the README.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,13 +29,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the contribution
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Check out Customs from a trusted release
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: SAAF-Project/customs
           ref: ${{ inputs.customs-ref }}
@@ -36,11 +43,17 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
       - name: Inspect the contribution
         env:
           BASE_REF: ${{ github.base_ref }}
-        run: python .customs-tool/customs/customs.py --changed-since "origin/$BASE_REF"
+          ALLOW_EMPTY: ${{ inputs.allow-empty }}
+        run: |
+          args=(--changed-since "origin/$BASE_REF")
+          if [ "$ALLOW_EMPTY" = "true" ]; then
+            args+=(--allow-empty)
+          fi
+          python .customs-tool/customs/customs.py "${args[@]}"

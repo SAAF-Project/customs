@@ -46,7 +46,7 @@ else:  # pragma: no cover
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import rules as R  # noqa: E402
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 CONFIG_FILE = "customs.toml"
 ALLOWLIST_FILE = ".customs-allowlist.toml"
 PRUNE_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".customs-tool"}

@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.2.0 (2026-11-20)
+
+### Added
+
+- The reusable workflow has an `allow-empty` input (boolean, default `false`). When it is `true`, the workflow passes `--allow-empty`, so a pull request that changes no file Customs inspects reports NOTHING INSPECTED and exits with `0`, never CLEARED. CUS-G1 is still reported for changes to Customs controls. Meant only for repositories whose code holds no prompts; the README explains the opt-in and asks adopters to name the check for what it covers, for example "Customs (manifests and docs)". This repository's own Customs workflow does not opt in.
+- Criterion CO-3.8 in `AUDIT-CRITERIA.md`, with two tests, for the opt-in.
+
+### Changed
+
+- `actions/checkout` is now v7.0.1 and `actions/setup-python` v7.1.0 in every workflow, both on Node 24, still pinned to a full commit SHA.
+
+### Fixed
+
+- The reusable workflow's header no longer says to replace `SAAF-Project/customs` with the published location, and neither does the README: that is where Customs is published.
+
 ## v1.1.0 (2026-11-18)
 
 `VERSION` in `customs/customs.py` was `0.1.0` while the release tags were already at `v1.0.1`, so `customs --version` and the report gave a version that did not match any release. It is now `1.1.0`, the same as this release's tag.

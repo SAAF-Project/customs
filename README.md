@@ -57,7 +57,7 @@ Exit codes: `0` cleared (or nothing inspected, when allowed), `1` blocked, `2` c
 
 **No silent pass.** Customs never clears what it did not inspect. If a full scan, a folder you name, or the files a pull request changes (`--changed-since`) include nothing it inspects (for example because the change is only to a script, the prompts use a file type that is not included, or everything is excluded), Customs reports NOT ASSESSED, lists the files it did not inspect and exits with `2`, so the check fails instead of showing green. Changes to Customs controls (CUS-G1) are still reported in that run. A pull request that adds or changes no files at all, for example one that only deletes files, has nothing to inspect: the result is NOTHING INSPECTED, with exit code `0`.
 
-If your repository regularly has pull requests that change only code, and that code is reviewed elsewhere, pass `--allow-empty` in the workflow. Those runs then report NOTHING INSPECTED rather than failing, and still never CLEARED.
+`--allow-empty` is off by default. In a repository whose code holds no prompts, it can be turned on in the workflow; see [Repositories whose code holds no prompts](#repositories-whose-code-holds-no-prompts).
 
 In GitHub Actions, Customs also writes a summary table to the run page and marks each finding on the changed line of the pull request.
 
@@ -85,14 +85,34 @@ jobs:
     uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@02e3cf1e4678c36a816ecfd31a9d22ba366dd07a # v1.1.0
     with:
       customs-ref: 02e3cf1e4678c36a816ecfd31a9d22ba366dd07a # v1.1.0
+      # allow-empty: true   # off by default; from v1.2.0, see "Repositories whose code holds no prompts"
 ```
 
-The checker is fetched from a Customs release, not from the pull request, so a contribution cannot weaken the check that inspects it. Replace `SAAF-Project/customs` with the location where this repository is published.
+The checker is fetched from a Customs release, not from the pull request, so a contribution cannot weaken the check that inspects it.
 
 - **Both lines are pinned to the same commit.** The reusable workflow's `customs-ref` defaults to `v1`, which still points to v1.0.1, and pinning both to a full commit SHA means nothing changes underneath you without a reviewed change to this file.
 - **The workflow runs on `pull_request` only.** Customs compares the contribution with the pull request's base branch, and other events have no base branch.
 - **Check what Customs inspects.** By default it inspects files that agents read as instructions: Markdown, `.prompt` files, `.cursorrules`, MCP settings, `*agent*.yaml` and similar. If your repository keeps its instructions elsewhere, add a `customs.toml` with your own patterns in `extra_include` (or `include` to replace the defaults).
 - **Start with Customs reporting only, not as a required check.** A pull request that changes only files Customs does not inspect is reported as NOT ASSESSED, and the check fails. Make it required (see [Protecting the guard](#protecting-the-guard)) once your include patterns cover your repository.
+
+### Repositories whose code holds no prompts
+
+Some repositories keep their prompts, skills and agent settings in files Customs inspects (manifests, Markdown, `.prompt` files) and have code that holds no prompts at all. In those repositories every code-only pull request is NOT ASSESSED and fails the check, which says nothing useful. From v1.2.0 the reusable workflow has an `allow-empty` input for this case:
+
+```yaml
+jobs:
+  customs:
+    name: Customs (manifests and docs)
+    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@<v1.2.0 commit SHA> # v1.2.0
+    with:
+      customs-ref: <v1.2.0 commit SHA> # v1.2.0
+      allow-empty: true
+```
+
+- **It is off by default.** Without `allow-empty: true`, nothing changes.
+- **It is meant only for repositories whose code holds no prompts.** If any code in the repository builds or holds a prompt, leave it off, or add those files to `extra_include` in `customs.toml` so Customs inspects them.
+- **The result is NOTHING INSPECTED, never CLEARED.** A pull request that changes no file Customs inspects exits with `0` and shows a green check, but the run says that nothing was inspected and is not evidence that any content is safe. Changes to Customs controls (CUS-G1) are still reported.
+- **Name the check for what it covers**, for example "Customs (manifests and docs)", so that a green check is not read as covering the code. The name is the `name:` of the job, as in the example above.
 
 ### Option B: copy it in
 
