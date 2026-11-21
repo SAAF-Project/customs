@@ -295,6 +295,41 @@ class AuditCriteria(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertEqual(report["result"], "nothing_inspected")
 
+    def test_opted_in_pull_request_says_nothing_inspected_and_reports_controls(self):  # CO-3.8, N-1
+        with tempfile.TemporaryDirectory() as tmp:
+            root = base_repo(tmp)
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            (workflows / "ci.yml").write_text("name: ci\non: pull_request\n", encoding="utf-8")
+            (root / "helper.py").write_text("print('hello')\n", encoding="utf-8")
+            git(root, "add", "-A")
+            git(root, "commit", "-qm", "contribution")
+            code, report = run("--root", str(root), "--changed-since", "main", "--allow-empty")
+            self.assertEqual(code, 0)
+            self.assertEqual(report["result"], "nothing_inspected")
+            self.assertEqual(report["files_scanned"], [])
+            g1 = [f["file"] for f in report["findings"] if f["rule"] == "CUS-G1"]
+            self.assertEqual(g1, [".github/workflows/ci.yml"])
+
+    def test_reusable_workflow_passes_allow_empty_only_when_opted_in(self):  # CO-3.8
+        text = (HERE.parent / ".github" / "workflows" / "customs-reusable.yml").read_text(encoding="utf-8")
+        self.assertRegex(text, r"\n      allow-empty:\n(?:        .*\n)*?        type: boolean\n"
+                               r"        default: false\n")
+        # Run the step's script with python stubbed out to print the arguments it would get.
+        lines = text.splitlines()
+        start = lines.index("        run: |", lines.index("      - name: Inspect the contribution")) + 1
+        body = []
+        for line in lines[start:]:
+            if line.strip() and not line.startswith("          "):
+                break
+            body.append(line[10:])
+        script = 'python() { printf "%s\\n" "$@"; }\n' + "\n".join(body)
+        for allow_empty, expected in [("false", []), ("", []), ("true", ["--allow-empty"])]:
+            out = subprocess.run(["bash", "-ec", script], capture_output=True, text=True, check=True,
+                                 env={"PATH": "/usr/bin:/bin", "BASE_REF": "main", "ALLOW_EMPTY": allow_empty})
+            self.assertEqual(out.stdout.splitlines(),
+                             [".customs-tool/customs/customs.py", "--changed-since", "origin/main", *expected])
+
     def test_summary_states_files_inspected_and_threshold(self):  # CO-3.4
         out = io.StringIO()
         with contextlib.redirect_stdout(out):

@@ -9,7 +9,7 @@ This document says what Customs must be judged against as an auditee. The [READM
 | **Agent** | Customs |
 | **Repository** | https://github.com/SAAF-Project/customs |
 | **Maintainer(s)** | Anja Nell (@AnjaNellRE), Tony Barratt (@TonyBarratt100) |
-| **Last reviewed** | 2026-11-18 |
+| **Last reviewed** | 2026-11-20 |
 | **Status** | Draft |
 
 Sources used to draft this document: the README, `customs/rules.py`, `customs/customs.py`, `agent.yaml`, the tests in `tests/test_customs.py`, and a set of manual runs on throwaway synthetic repositories on 17 November 2026 for behaviour the tests did not yet cover. All content used is synthetic.
@@ -58,6 +58,8 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
   History, stated honestly: until 17 November 2026 such a pull request was reported as CLEARED with "inspected 0 file(s)" and a green check. A script containing override wording passed this way in a manual run that day. The behaviour was changed on the same day.
 - [llm] CO-3.6 Given the output of one run, a reader can tell from the output alone how many files were inspected, what the result was (CLEARED, BLOCKED, NOT ASSESSED or NOTHING INSPECTED) and why, without rerunning Customs.
 - [code] CO-3.7 Given a pull request that adds or changes no files at all (for example one that only deletes files), Customs reports NOTHING INSPECTED and exits with 0, because there is nothing to inspect.
+- [code] CO-3.8 Given a repository that opts in with the reusable workflow's `allow-empty` input, and a pull request that changes only files outside the inspected types, including a control file, Customs reports NOTHING INSPECTED, never CLEARED, exits with 0, and still reports CUS-G1 on the control file. The input is off by default, and the workflow passes `--allow-empty` only when it is set to true.
+  Limitation, stated honestly: an opted-in repository gets a green check on such pull requests. The check must be named for what it covers (for example "Customs (manifests and docs)"), and the opt-in is meant only for repositories whose code holds no prompts. Customs cannot verify either.
 
 **CO-4: Exceptions are controlled**
 - [code] CO-4.1 Given a valid exception, Customs applies it and keeps the accepted finding in the report, with its justification.
@@ -77,7 +79,7 @@ AI-specific regulation (such as the EU AI Act) is deliberately not mapped: Custo
 
 ## 5. Coverage gaps
 
-- **Code-only pull requests now fail the Customs check (CO-3.5).** This is the intended effect of "no silent pass", but it means a pull request that changes only scripts shows a red Customs check, in this repository too. Repositories where that is routine can pass `--allow-empty`, which reports NOTHING INSPECTED instead. The trade-off should be reviewed after a few weeks of use.
+- **Code-only pull requests now fail the Customs check (CO-3.5).** This is the intended effect of "no silent pass", but it means a pull request that changes only scripts shows a red Customs check, in this repository too. Repositories whose code holds no prompts can opt in with the reusable workflow's `allow-empty` input (CO-3.8), which reports NOTHING INSPECTED instead. The trade-off should be reviewed after a few weeks of use.
 - **Repositories using the reusable workflow keep the old behaviour until a new release is tagged.** The workflow is fetched from a tagged release (`@v1`), so the change in CO-3.5 reaches them only after the maintainers tag a new release.
 - **Pattern matching, not understanding.** Rephrased instructions, and languages other than English and Dutch, are not detected. Customs supports a human reviewer and does not replace one.
 - **It reads text and does not run code.** A script that looks harmless but behaves badly when run will pass. Script review needs separate tooling.
@@ -111,6 +113,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | CO-3.5 | `python3 -I scripts/run_criterion.py test_change_to_uninspected_files_only_is_not_assessed` | ☑ | `test_change_to_uninspected_files_only_is_not_assessed` |
 | CO-3.6 | `llm_checks.yaml` | ☑ | Judged pass on synthetic runs, 17 November 2026, by a judge that is not independent; see `evals/llm-check-results-2026-11-17.md` |
 | CO-3.7 | `python3 -I scripts/run_criterion.py test_pull_request_that_only_deletes_files_is_not_blocked` | ☑ | `test_pull_request_that_only_deletes_files_is_not_blocked` |
+| CO-3.8 | `python3 -I scripts/run_criterion.py test_opted_in_pull_request_says_nothing_inspected_and_reports_controls test_reusable_workflow_passes_allow_empty_only_when_opted_in` | ☑ | `test_opted_in_pull_request_says_nothing_inspected_and_reports_controls`, `test_reusable_workflow_passes_allow_empty_only_when_opted_in` |
 | CO-4.1 | `python3 -I scripts/run_criterion.py test_valid_exception_is_applied_and_kept_visible` | ☑ | `test_valid_exception_is_applied_and_kept_visible` |
 | CO-4.2 | `python3 -I scripts/run_criterion.py test_exception_without_justification_is_ignored` | ☑ | `test_exception_without_justification_is_ignored` |
 | CO-4.3 | `python3 -I scripts/run_criterion.py test_expired_exception_is_ignored` | ☑ | `test_expired_exception_is_ignored` |
@@ -119,7 +122,7 @@ Each criterion runs with `python3 -I scripts/run_criterion.py <test name>`: exit
 | M-2 | `python3 -I scripts/run_criterion.py test_result_word_matches_exit_code test_allowed_empty_scan_says_nothing_inspected_not_cleared` | ☑ | `test_result_word_matches_exit_code`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
 | M-3 | `python3 -I scripts/run_criterion.py test_valid_exception_is_applied_and_kept_visible test_accepted_finding_records_approver` | ☑ | `test_valid_exception_is_applied_and_kept_visible`, `test_accepted_finding_records_approver` |
 | M-4 | `python3 -I scripts/run_criterion.py test_exception_without_justification_is_ignored test_expired_exception_is_ignored test_exception_without_approver_is_ignored` | ☑ | `test_exception_without_justification_is_ignored`, `test_expired_exception_is_ignored`, `test_exception_without_approver_is_ignored` |
-| N-1 | `python3 -I scripts/run_criterion.py test_empty_folder_is_not_assessed test_target_that_is_fully_excluded_is_not_assessed test_change_to_uninspected_files_only_is_not_assessed test_allowed_empty_scan_says_nothing_inspected_not_cleared` | ☑ | `test_empty_folder_is_not_assessed`, `test_target_that_is_fully_excluded_is_not_assessed`, `test_change_to_uninspected_files_only_is_not_assessed`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared` |
+| N-1 | `python3 -I scripts/run_criterion.py test_empty_folder_is_not_assessed test_target_that_is_fully_excluded_is_not_assessed test_change_to_uninspected_files_only_is_not_assessed test_allowed_empty_scan_says_nothing_inspected_not_cleared test_opted_in_pull_request_says_nothing_inspected_and_reports_controls` | ☑ | `test_empty_folder_is_not_assessed`, `test_target_that_is_fully_excluded_is_not_assessed`, `test_change_to_uninspected_files_only_is_not_assessed`, `test_allowed_empty_scan_says_nothing_inspected_not_cleared`, `test_opted_in_pull_request_says_nothing_inspected_and_reports_controls` |
 | N-2 | `python3 -I scripts/run_criterion.py test_contribution_cannot_approve_its_own_exception test_contribution_cannot_loosen_settings_for_itself` | ☑ | `test_contribution_cannot_approve_its_own_exception`, `test_contribution_cannot_loosen_settings_for_itself` |
 | N-3 | `python3 -I scripts/run_criterion.py test_scanner_imports_no_network_library` | ☑ | `test_scanner_imports_no_network_library` |
 | N-4 | `python3 -I scripts/run_criterion.py test_scanner_runs_only_git` | ☑ | `test_scanner_runs_only_git` |
