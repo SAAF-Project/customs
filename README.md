@@ -82,9 +82,9 @@ permissions:
   contents: read
 jobs:
   customs:
-    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@02e3cf1e4678c36a816ecfd31a9d22ba366dd07a # v1.1.0
+    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@180829c8c6a98e4c4ebfe162d78de85dde6c8022 # v1.2.0
     with:
-      customs-ref: 02e3cf1e4678c36a816ecfd31a9d22ba366dd07a # v1.1.0
+      customs-ref: 180829c8c6a98e4c4ebfe162d78de85dde6c8022 # v1.2.0
       # allow-empty: true   # off by default; from v1.2.0, see "Repositories whose code holds no prompts"
 ```
 
@@ -103,9 +103,9 @@ Some repositories keep their prompts, skills and agent settings in files Customs
 jobs:
   customs:
     name: Customs (manifests and docs)
-    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@<v1.2.0 commit SHA> # v1.2.0
+    uses: SAAF-Project/customs/.github/workflows/customs-reusable.yml@180829c8c6a98e4c4ebfe162d78de85dde6c8022 # v1.2.0
     with:
-      customs-ref: <v1.2.0 commit SHA> # v1.2.0
+      customs-ref: 180829c8c6a98e4c4ebfe162d78de85dde6c8022 # v1.2.0
       allow-empty: true
 ```
 
